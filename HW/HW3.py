@@ -18,7 +18,7 @@ with st.sidebar:
     # Model selection
     model_choice = st.selectbox(
         "Select Premium Model",
-        options=["gpt-4o", "gemini-1.5-pro"]
+        options=["gpt-4o", "gemini-3-pro"]
     )
 
 # Function from HW2
