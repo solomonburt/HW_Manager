@@ -1,53 +1,75 @@
 import streamlit as st
+import requests
+from bs4 import BeautifulSoup
 from openai import OpenAI
+import google.generativeai as genai
 
-st.title("Lab 3: Chatbot with Memory")
+# Page title and description
+st.title("HW3: URL Chatbot")
+st.write("Chat with URLs using a 6-message buffer.")
 
-# setup OpenAI Client
-if "OPENAI_API_KEY" in st.secrets:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-else:
-    st.error("Missing API Key in Secrets!")
-    st.stop()
+# Sidebar configurations
+with st.sidebar:
+    st.header("Settings")
+    # URL inputs
+    url1 = st.text_input("Enter URL 1")
+    url2 = st.text_input("Enter URL 2")
+    
+    # Model selection
+    model_choice = st.selectbox(
+        "Select Premium Model",
+        options=["gpt-4o", "gemini-1.5-pro"]
+    )
 
-# initialize chat history
+# Function from HW2
+def read_url_content(url):
+    if not url: return ""
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        return soup.get_text()
+    except: return ""
+
+# Initialize chat history
 if "messages" not in st.session_state:
-    # 10-year-old level 
+    context = read_url_content(url1) + "\n" + read_url_content(url2)
     st.session_state.messages = [
-        {"role": "system", "content": "You are a helpful assistant. Explain things so a 10-year-old can understand. After every answer, you must ask 'Do you want more info?'"}
+        {"role": "system", "content": f"Use this context: {context}"}
     ]
 
-# chat history
-for message in st.session_state.messages:
-    if message["role"] != "system":
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+# Display history
+for msg in st.session_state.messages:
+    if msg["role"] != "system":
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-# user input
-if prompt := st.chat_input("What is on your mind?"):
-    # Add user message to history
+# User interaction
+if prompt := st.chat_input("Ask about the URLs:"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # conversation buffer
-    system_prompt = st.session_state.messages[0]
-    recent_history = st.session_state.messages[-5:] # get last 5 messages
-    # Filter to not get the system prompt if in the last 5
-    filtered_history = [msg for msg in recent_history if msg["role"] != "system"]
-    messages_to_send = [system_prompt] + filtered_history
+    # 6-message memory buffer
+    sys_prompt = st.session_state.messages[0]
+    # Keep last 6 messages
+    buffer = [m for m in st.session_state.messages[-6:] if m["role"] != "system"]
+    msgs_to_send = [sys_prompt] + buffer
 
-    # generate stream response
     with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages_to_send,
-            stream=True,
-        )
-        response = st.write_stream(stream)
+        if "gpt" in model_choice:
+            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+            stream = client.chat.completions.create(
+                model=model_choice, messages=msgs_to_send, stream=True
+            )
+            response = st.write_stream(stream)
+        else:
+            # Gemini provider logic
+            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+            model = genai.GenerativeModel(model_choice)
+            # Reformat for Gemini
+            gemini_history = [{"role": "user" if m["role"]=="user" else "model", 
+                               "parts": [m["content"]]} for m in msgs_to_send]
+            response = model.generate_content(gemini_history).text
+            st.markdown(response)
     
-    # save response to history
     st.session_state.messages.append({"role": "assistant", "content": response})
-
-    # Part C refining?
