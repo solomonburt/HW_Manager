@@ -65,7 +65,7 @@ if target_url:
                     summary = response.choices[0].message.content
 
                 elif llm_provider == "Gemini":
-                    model_name = "gemini-1.5-pro" if use_advanced else "gemini-1.5-flash"
+                    model_name = "gemini-2.5-pro" if use_advanced else "gemini-2.5-flash-lite"
                     
                     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
                     model = genai.GenerativeModel(model_name)
