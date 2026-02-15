@@ -4,7 +4,9 @@ import streamlit as st
 pg = st.navigation([
     st.Page("HW/HW1.py", title="Homework 1: File Summarizer"),
     st.Page("HW/HW2.py", title="Homework 2: URL Summarizer"),
-    st.Page("HW/HW3.py", title="Homework 3: URL Chatbot") # Added HW3
+    st.Page("HW/HW3.py", title="Homework 3: URL Chatbot")
+    st.Page("HW/HW4.py", title="Homework 4: iSchool Chatbot") # Added HW
+
 ])
 
 # Shared page configuration
@@ -16,3 +18,4 @@ st.write("Use the sidebar to navigate between your assignments.")
 
 # Run navigation
 pg.run()
+
