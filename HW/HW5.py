@@ -4,6 +4,7 @@ import chromadb
 from openai import OpenAI
 
 # setup path
+folder_path = os.path.join("HW", "su_orgs", "su_orgs")
 db_path = "chroma_db_storage"
 collection_name = "su_orgs"
 
