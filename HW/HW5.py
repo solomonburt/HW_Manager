@@ -8,15 +8,22 @@ db_path = "chroma_db_storage"
 collection_name = "su_orgs"
 
 def get_relevant_club_info(query):
-    """
-    Takes a query and returns relevant information from ChromaDB.
-    """
     client = chromadb.PersistentClient(path=db_path)
+    # check for collection
+    try:
+        collection = client.get_collection(name=collection_name)
+    except:
+        return "ERROR: Collection not found. Please run the data ingestion script first."
+        
     collection = client.get_or_create_collection(name=collection_name)
     
     # vector search
     results = collection.query(query_texts=[query], n_results=3)
-    
+
+    # Check if documents list is empty
+    if not results['documents'] or not results['documents'][0]:
+        return "No relevant documents found."
+        
     # Flatten documents into string
     context = "\n\n".join(results['documents'][0])
     return context
@@ -50,7 +57,10 @@ if prompt := st.chat_input("What would you like to know about SU clubs?"):
     messages_to_send = [
         {
             "role": "system", 
-            "content": f"You are a helpful assistant. Use this context to answer: {retrieved_info}"
+            "content": (
+            "You are a helpful assistant. Use ONLY the following context to answer the user's question. "
+            "If the information is not in the context, say 'I don't know based on the documents provided.' "
+            f"Context: {retrieved_info}"
         }
     ]
     messages_to_send.extend(st.session_state.hw5_messages[-10:]) 
