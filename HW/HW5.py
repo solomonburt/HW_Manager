@@ -62,6 +62,7 @@ if prompt := st.chat_input("What would you like to know about SU clubs?"):
             "You are a helpful assistant. Use ONLY the following context to answer the user's question. "
             "If the information is not in the context, say 'I don't know based on the documents provided.' "
             f"Context: {retrieved_info}"
+            )
         }
     ]
     messages_to_send.extend(st.session_state.hw5_messages[-10:]) 
