@@ -1,4 +1,8 @@
 import streamlit as st
+# titling
+st.set_page_config(page_title="HW Manager", layout="wide")
+st.title("HW Manager")
+st.write("Use the sidebar to navigate between your assignments.")
 
 # define the pages
 hw1 = st.Page("HW/HW1.py", title="Homework 1: File Summarizer")
@@ -9,11 +13,10 @@ hw5 = st.Page("HW/HW5.py", title="Homework 5: Intelligent Chatbot") # Added for 
 
 # navigation setup
 pg = st.navigation([hw1, hw2, hw3, hw4, hw5])
-st.set_page_config(page_title="HW Manager", layout="wide")
-st.title("HW Manager")
-st.write("Use the sidebar to navigate between your assignments.")
+
 
 pg.run()
+
 
 
 
