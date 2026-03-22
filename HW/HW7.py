@@ -3,8 +3,13 @@ import chromadb
 from openai import OpenAI
 import os
 
-# Configuration
-DB_PATH = "news_db_storage"
+# new path logic
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# This joins that directory with your database folder name
+DB_PATH = os.path.join(current_dir, "news_db_storage")
+
+
 COLLECTION_NAME = "news_monitor"
 
 st.set_page_config(page_title="HW7: News Bot", layout="wide")
